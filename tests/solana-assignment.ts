@@ -1,6 +1,7 @@
 import * as anchor from "@project-serum/anchor";
 import { Program } from "@project-serum/anchor";
 import { SolanaAssignment } from "../target/types/solana_assignment";
+import fs from 'fs';
 
 describe("solana-assignment", () => {
   // Configure the client to use the local cluster.
@@ -14,3 +15,12 @@ describe("solana-assignment", () => {
     console.log("Your transaction signature", tx);
   });
 });
+
+
+(async () => {
+
+  const idl = JSON.parse(fs.readFileSync('./target/types/solana_assignment.idl').toString());
+  console.log(idl)
+
+
+})()
