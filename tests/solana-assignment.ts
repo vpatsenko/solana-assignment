@@ -5,22 +5,29 @@ import fs from 'fs';
 
 describe("solana-assignment", () => {
   // Configure the client to use the local cluster.
-  anchor.setProvider(anchor.AnchorProvider.env());
+  const provider = anchor.AnchorProvider.local();
+  anchor.setProvider(provider);
 
   const program = anchor.workspace.SolanaAssignment as Program<SolanaAssignment>;
 
   it("Is initialized!", async () => {
-    // Add your test here.
-    const tx = await program.methods.initialize().rpc();
-    console.log("Your transaction signature", tx);
+    await program.rpc.create(
+      provider.wallet.publickey,
+      {
+        accounts: {
+          treasury: treasury.publickey,
+          user: provider.wallet.publickey,
+          systemprogram: systemprogram.programid,
+        },
+        signers: [treasury],
+      }
+    );
+
+    let treasuryAccount = await program.account.treasury.fetch(treasury.publicKey);
+    console.log(treasuryAccount.deposit);
+    let deposit = treasuryAccount.deposit.toString();
+    console.log(deposit);
   });
 });
 
 
-(async () => {
-
-  const idl = JSON.parse(fs.readFileSync('./target/types/solana_assignment.idl').toString());
-  console.log(idl)
-
-
-})()

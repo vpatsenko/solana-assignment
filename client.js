@@ -1,10 +1,7 @@
 const anchor = require('@project-serum/anchor');
-// const fs = require('fs');
+const { SystemProgram } = anchor.web3;
 
 
-// anchor.setProvider(anchor.AnchorProvider.local());
-
-// const { SystemProgram } = anchor.web3;
 async function main() {
 	const programID = "Df4dFXdvoVW7RAdsnEwxSBT48j1Mh3CJTJWy4PKDJg9W"
 
@@ -17,20 +14,45 @@ async function main() {
 
 	// Generate the program client from IDL.
 
+	console.log(idl)
 	const provider = anchor.AnchorProvider.local();
-	// const provider = anchor.AnchorProvider.env();
-	console.log(provider);
+	anchor.setProvider(provider);
 
-	// const program = new anchor.Program(idl, programId);
+	const treasury = anchor.web3.Keypair.generate();
+	const program = new anchor.Program(idl, programId);
 
-	// Execute the RPC.
-	// await program.rpc.initialize();
+	await program.rpc.create(
+		provider.wallet.publicKey,
+		{
+			accounts: {
+				treasury: treasury.publicKey,
+				user: provider.wallet.publicKey,
+				systemProgram: SystemProgram.programId,
+			},
+			signers: [treasury],
+		}
+	);
+
+	let treasuryAccount = await program.account.treasury.fetch(treasury.publicKey);
+	console.log(treasuryAccount.deposit);
+	let deposit = treasuryAccount.deposit.toString();
+	console.log(deposit);
 
 
 
+
+	// await program.rpc.sendSol(
+	// 	provider.wallet.publicKey,
+	// 	{
+	// 		accounts: {
+	// 			treasury: treasury.publicKey,
+	// 			user: provider.wallet.publicKey,
+	// 			systemProgram: SystemProgram.programId,
+	// 		},
+	// 		signers: [treasury],
+	// 	}
+	// )
 }
 
 
-main().then(
-	console.log("success"),
-)
+main()
