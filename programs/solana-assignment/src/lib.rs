@@ -8,11 +8,30 @@ mod solana_assignment {
     use anchor_lang::solana_program::entrypoint::*;
     use anchor_lang::solana_program::program::*;
     use anchor_lang::solana_program::system_instruction::*;
+    use system_instruction;
 
     pub fn create(ctx: Context<Create>, authority: Pubkey) -> Result<()> {
         let tresuary = &mut ctx.accounts.treasury;
         tresuary.authority = authority;
-        tresuary.deposit = 0;
+        let accountInfo = &mut tresuary.to_account_info();
+
+        let lamports = match accountInfo.try_lamports() {
+            Ok(l) => l,
+            Err(e) => {
+                msg!("Error: {:?}", e);
+                return Err(anchor_lang::error::Error::from(e));
+            }
+        };
+
+        msg!("accountInfo: {:?}", accountInfo);
+        msg!("lamports: {:?}", lamports);
+
+        system_instruction::transfer(&ctx.accounts.treasury, &ctx.accounts.program, lamports)?;
+        // let x = accountInfo.lamports;
+        // let b = x.into_inner().;
+
+        // let c = *b.;
+
         Ok(())
     }
 
@@ -81,5 +100,5 @@ pub struct SendSol<'info> {
 #[account]
 pub struct Treasury {
     pub authority: Pubkey,
-    pub deposit: u64,
+    // deposit: >,
 }

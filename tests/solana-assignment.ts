@@ -4,7 +4,6 @@ import { SolanaAssignment } from "../target/types/solana_assignment";
 import fs from 'fs';
 
 describe("solana-assignment", () => {
-  // Configure the client to use the local cluster.
   const provider = anchor.AnchorProvider.local();
   anchor.setProvider(provider);
 

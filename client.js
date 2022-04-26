@@ -12,7 +12,6 @@ async function main() {
 	// Address of the deployed program.
 	const programId = new anchor.web3.PublicKey(programID);
 
-	// Generate the program client from IDL.
 
 	console.log(idl)
 	const provider = anchor.AnchorProvider.local();
@@ -20,6 +19,7 @@ async function main() {
 
 	const treasury = anchor.web3.Keypair.generate();
 	const program = new anchor.Program(idl, programId);
+
 
 	await program.rpc.create(
 		provider.wallet.publicKey,
@@ -34,23 +34,26 @@ async function main() {
 	);
 
 	let treasuryAccount = await program.account.treasury.fetch(treasury.publicKey);
-	console.log(treasuryAccount.deposit);
-	let deposit = treasuryAccount.deposit.toString();
-	console.log(deposit);
+	// console.log(treasuryAccount.deposit);
+	// let deposit = treasuryAccount.deposit.toString();
+	// console.log(deposit);
 
 
 
+	// const accountTo = anchor.web3.Keypair.generate();
 
 	// await program.rpc.sendSol(
 	// 	provider.wallet.publicKey,
 	// 	{
 	// 		accounts: {
-	// 			treasury: treasury.publicKey,
-	// 			user: provider.wallet.publicKey,
+	// 			from: provider.wallet.publicKey,
+	// 			to: accountTo.publicKey,
 	// 			systemProgram: SystemProgram.programId,
 	// 		},
-	// 		signers: [treasury],
-	// 	}
+	// 		signers: [provider.wallet.Keypair],
+	// 		amount: 100
+	// 	},
+
 	// )
 }
 
