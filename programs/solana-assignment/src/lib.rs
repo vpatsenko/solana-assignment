@@ -1,104 +1,65 @@
 use anchor_lang::prelude::*;
 
-declare_id!("Df4dFXdvoVW7RAdsnEwxSBT48j1Mh3CJTJWy4PKDJg9W");
+declare_id!("EE3g9Y5MsBs9HWoenTvp8SCYv9gGxeiNNjggLt4kzACL");
 
 #[program]
-mod solana_assignment {
+pub mod solana_assignment {
     use super::*;
-    use anchor_lang::solana_program::entrypoint::*;
-    use anchor_lang::solana_program::program::*;
-    use anchor_lang::solana_program::system_instruction::*;
-    use system_instruction;
 
-    pub fn create(ctx: Context<Create>, authority: Pubkey) -> Result<()> {
-        let tresuary = &mut ctx.accounts.treasury;
-        tresuary.authority = authority;
-        let accountInfo = &mut tresuary.to_account_info();
+    pub fn initialize_treasury(ctx: Context<InitializeTreasury>) -> Result<()> {
+        let treasury_account = &mut ctx.accounts.treasury;
 
-        let lamports = match accountInfo.try_lamports() {
-            Ok(l) => l,
-            Err(e) => {
-                msg!("Error: {:?}", e);
-                return Err(anchor_lang::error::Error::from(e));
-            }
-        };
+        // treasury_account.deposit_amount = 0;
+        // treasury_account.bump = *ctx.bumps.get("treasury_account").unwrap();
 
-        msg!("accountInfo: {:?}", accountInfo);
-        msg!("lamports: {:?}", lamports);
+        // let base_account = &mut ctx.accounts.base_account;
 
-        system_instruction::transfer(&ctx.accounts.treasury, &ctx.accounts.program, lamports)?;
-        // let x = accountInfo.lamports;
-        // let b = x.into_inner().;
-
-        // let c = *b.;
+        // base_account.total_gifs = 0;
+        // base_account.bump = *ctx.bumps.get("base_account").unwrap();
 
         Ok(())
     }
 
-    // pub fn increment(ctx: Context<Increment>) -> Result<()> {
-    //     let counter = &mut ctx.accounts.counter;
-    //     counter.count += 1;
+    // pub fn add_gif(ctx: Context<AddGif>, gif_link: String) -> Result<()> {
+    //     let base_account = &mut ctx.accounts.base_account;
+
+    //     let item = ItemStruct {
+    //         gif_link: gif_link.to_string(),
+    //         user_address: *base_account.to_account_info().key,
+    //     };
+
+    //     base_account.gif_list.push(item);
+
     //     Ok(())
     // }
-
-    pub fn send_sol(ctx: Context<SendSol>, amount: u64) -> ProgramResult {
-        // let ix = transfer(&ctx.accounts.from.key(), &ctx.accounts.to.key(), amount);
-
-        // invoke(
-        //     &ix,
-        //     &[
-        //         ctx.accounts.from.to_account_info(),
-        //         ctx.accounts.to.to_account_info(),
-        //     ],
-        // )
-
-        let acc = match ctx.accounts.from.try_borrow_mut_lamports() {
-            Ok(number) => number,
-            Err(e) => {
-                msg!("{}", e);
-                return Err(e);
-            }
-        };
-
-        msg!("{}", acc);
-
-        Ok(())
-    }
 }
 
 #[derive(Accounts)]
-pub struct Create<'info> {
-    #[account(init, payer = user, space = 8 + 40)]
+pub struct InitializeTreasury<'info> {
+    #[account(init, payer = user, space = 9000, seeds = [b"treasury-account"], bump)]
     pub treasury: Account<'info, Treasury>,
     #[account(mut)]
     pub user: Signer<'info>,
     pub system_program: Program<'info, System>,
 }
 
-// #[derive(Accounts)]
-// pub struct Increment<'info> {
-//     #[account(mut, has_one = authority)]
-//     pub counter: Account<'info, Counter>,
-//     pub authority: Signer<'info>,
-// }
-
-// #[account]
-// pub struct Counter {
-//     pub authority: Pubkey,
-//     pub count: u64,
-// }
-
 #[derive(Accounts)]
-pub struct SendSol<'info> {
+pub struct AddGif<'info> {
+    #[account(mut, seeds = [b"treasury-account"], bump = treasury.bump)]
+    pub treasury: Account<'info, Treasury>,
     #[account(mut)]
-    from: Signer<'info>,
-    #[account(mut)]
-    to: AccountInfo<'info>,
-    system_program: Program<'info, System>,
+    pub user: Signer<'info>,
+}
+
+#[derive(Debug, Clone, AnchorSerialize, AnchorDeserialize)]
+pub struct ItemStruct {
+    pub amount: u64,
+    pub user_address: Pubkey,
 }
 
 #[account]
 pub struct Treasury {
-    pub authority: Pubkey,
-    // deposit: >,
+    deposit_amount: u64,
+    depositors_list: Vec<ItemStruct>,
+    bump: u8,
 }

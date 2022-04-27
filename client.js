@@ -1,61 +1,67 @@
 const anchor = require('@project-serum/anchor');
+const web3js = require('@solana/web3.js');
 const { SystemProgram } = anchor.web3;
 
+const pdaInited = true
 
-async function main() {
-	const programID = "Df4dFXdvoVW7RAdsnEwxSBT48j1Mh3CJTJWy4PKDJg9W"
+const main = async () => {
+	console.log("🚀 Starting test...")
 
-	const idl = JSON.parse(
-		require("fs").readFileSync("./target/idl/solana_assignment.json", "utf8")
-	);
-
-	// Address of the deployed program.
-	const programId = new anchor.web3.PublicKey(programID);
-
-
-	console.log(idl)
-	const provider = anchor.AnchorProvider.local();
+	const provider = anchor.AnchorProvider.env();
 	anchor.setProvider(provider);
 
-	const treasury = anchor.web3.Keypair.generate();
-	const program = new anchor.Program(idl, programId);
+	const program = anchor.workspace.Myepicproject;
 
 
-	await program.rpc.create(
-		provider.wallet.publicKey,
-		{
-			accounts: {
-				treasury: treasury.publicKey,
-				user: provider.wallet.publicKey,
-				systemProgram: SystemProgram.programId,
-			},
-			signers: [treasury],
+	const [baseAccPDA, _] = await web3js.PublicKey
+		.findProgramAddress(
+			[
+				anchor.utils.bytes.utf8.encode("base_account"),
+			],
+			program.programId
+		);
+
+	console.log("baseAccPDA: \n\n\n", baseAccPDA, "\n\n")
+
+	if (!pdaInited) {
+		console.log("🚀 Creating base account and initializing pda...")
+
+		let tx = await program.methods.startStuffOff().accounts({
+			user: provider.wallet.publicKey,
+			baseAccount: baseAccPDA,
+		}).rpc();
+		console.log("📝 Your transaction signature", tx);
+
+	}
+
+	// Fetch data from the account.
+	let account = await program.account.baseAccount.fetch(baseAccPDA);
+	console.log('👀 GIF Count', account.totalGifs.toString())
+
+	const link = "https://cdn.fishki.net/upload/post/2016/12/29/2178292/ruchnoj-ezhik-foto.jpg";
+	let tx = await program.rpc.addGif(link, {
+		accounts: {
+			baseAccount: baseAccPDA,
+			user: provider.wallet.publicKey,
 		}
-	);
+	});
 
-	let treasuryAccount = await program.account.treasury.fetch(treasury.publicKey);
-	// console.log(treasuryAccount.deposit);
-	// let deposit = treasuryAccount.deposit.toString();
-	// console.log(deposit);
+	console.log("📝 Your transaction signature from addGif", tx);
 
 
-
-	// const accountTo = anchor.web3.Keypair.generate();
-
-	// await program.rpc.sendSol(
-	// 	provider.wallet.publicKey,
-	// 	{
-	// 		accounts: {
-	// 			from: provider.wallet.publicKey,
-	// 			to: accountTo.publicKey,
-	// 			systemProgram: SystemProgram.programId,
-	// 		},
-	// 		signers: [provider.wallet.Keypair],
-	// 		amount: 100
-	// 	},
-
-	// )
+	account = await program.account.baseAccount.fetch(baseAccPDA);
+	console.log('👀 GIF Count', account.totalGifs.toString());
+	console.log("GIF List", account.gifList);
 }
 
+const runMain = async () => {
+	try {
+		await main();
+		process.exit(0);
+	} catch (error) {
+		console.error(error);
+		process.exit(1);
+	}
+};
 
-main()
+runMain();
