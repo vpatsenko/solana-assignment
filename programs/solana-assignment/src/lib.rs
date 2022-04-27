@@ -14,18 +14,9 @@ pub mod solana_assignment {
         Ok(())
     }
 
-    //     pub fn add_gif(ctx: Context<AddGif>, gif_link: String) -> Result<()> {
-    //         let base_account = &mut ctx.accounts.base_account;
-
-    //         let item = ItemStruct {
-    //             gif_link: gif_link.to_string(),
-    //             user_address: *base_account.to_account_info().key,
-    //         };
-
-    //         base_account.gif_list.push(item);
-
-    //         Ok(())
-    //     }
+    pub fn deposit_lamports(ctx: Context<DepositLamports>) -> Result<()> {
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
@@ -38,7 +29,7 @@ pub struct InitializeTreasury<'info> {
 }
 
 #[derive(Accounts)]
-pub struct AddGif<'info> {
+pub struct DepositLamports<'info> {
     #[account(mut, seeds = [b"treasury_account"], bump = treasury.bump)]
     pub treasury: Account<'info, TreasuryAccount>,
     #[account(mut)]
