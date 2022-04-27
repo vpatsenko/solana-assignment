@@ -14,7 +14,7 @@ pub mod solana_assignment {
         Ok(())
     }
 
-    pub fn deposit_lamports(ctx: Context<DepositLamports>) -> Result<()> {
+    pub fn deposit_lamports(ctx: Context<DepositLamports>, amount: u64) -> Result<()> {
         Ok(())
     }
 }

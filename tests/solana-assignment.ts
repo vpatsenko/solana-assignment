@@ -4,6 +4,18 @@ import { Program } from "@project-serum/anchor";
 import { SolanaAssignment } from "../target/types/solana_assignment";
 import * as web3js from "@solana/web3.js";
 import { assert } from "chai";
+import { readFileSync } from "fs";
+
+
+const AliceKeyPath = "keypairs/alice.json";
+const BobKeyPath = "keypairs/bob.json";
+
+function readKeypair(path: string): web3js.Keypair {
+  const content = readFileSync(path, "utf-8");
+  const jsonContent = JSON.parse(content);
+
+  return web3js.Keypair.fromSecretKey(Buffer.from(jsonContent));
+}
 
 describe("solana-assignment", () => {
   const provider = anchor.AnchorProvider.env();
@@ -18,6 +30,8 @@ describe("solana-assignment", () => {
 
 
   it("Is initialized!", async () => {
+
+    web3js.Keypair.generate();
 
 
     const [treasuryPDA, _] = await web3js.PublicKey.findProgramAddress(
@@ -45,5 +59,22 @@ describe("solana-assignment", () => {
     console.log('👀 Deposit size', account.depositAmount.toString());
 
     assert(account.depositAmount.toNumber() === 0);
+
+    console.log("🚀 Making a deposit...");
+    console.log(__dirname)
+
+    const aliceKey = readKeypair(AliceKeyPath);
+    const bobKey = readKeypair(BobKeyPath);
+
+    // TODO: add keypairs
+    const amount = new anchor.BN(web3js.LAMPORTS_PER_SOL / 2);
+    // let tx = await program.methods.depositLamports(amount).accounts({
+    //   treasury: treasuryPDA,
+    //   user: provider.wallet.publicKey,
+    // }).signers([provider.wallet.p]).rpc();
+
+
+
+
   });
 });
